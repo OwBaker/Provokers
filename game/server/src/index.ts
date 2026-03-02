@@ -9,9 +9,20 @@ const io = new Server(httpServer, {
     cors: { origin: "http://localhost:5173" }
 });
 
+
 const manager = new RoomManager();
 
 io.on("connection", (socket) => {
+  
+  const handleLeave = () => {
+      const code = manager.getRoomOf(socket.id);
+      if (code) {
+          manager.leaveRoom(socket.id);
+          socket.leave(code);
+          io.to(code).emit("playerLeft", "a player left the room");
+      }
+  };
+
   console.log("Client connected:", socket.id);
 
   socket.on("createRoom", (playerName: string) => {
@@ -21,6 +32,8 @@ io.on("connection", (socket) => {
     if (createReq.ok == true) {
       socket.join(createReq.code);
       socket.emit("roomCreated", `room created with code ${createReq.code}`);
+      const room = manager.getRoom(createReq.code);
+      socket.emit("roomData", { code: createReq.code, players: room?.players, isHost: true});
     } else {
       socket.emit("error", `room creation failed for ${playerName}`);
     }
@@ -33,18 +46,26 @@ io.on("connection", (socket) => {
     if (joinReq.ok == true) {
       socket.join(code);
       io.to(code).emit("roomJoined", `${playerName} joined room ${code}`);
+      const room = manager.getRoom(code);
+      socket.emit("roomData", { code: code, players: room?.players, isHost: false});
     } else {
       socket.emit("error", `join room failed: ${joinReq.error}`);
     }
   });
 
   socket.on("startGame", () => {
-    ;
+    const startReq = manager.startGame(socket.id);
+    const code = manager.getRoomOf(socket.id);
+    if (startReq.ok == true) {
+      io.to(code!).emit("gameStarted", "Game started by host");
+    } else {
+      socket.emit("error", `Game failed to start: ${startReq.error}`);
+    }
   });
 
-  socket.on("disconnect", () => {
-    console.log("Client disconnected:", socket.id);
-  });
+  socket.on("leaveRoom", handleLeave);
+
+  socket.on("disconnect", handleLeave);
 });
 
 httpServer.listen(3001, () => console.log("Server running on :3001"));

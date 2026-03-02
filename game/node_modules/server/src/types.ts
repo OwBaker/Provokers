@@ -8,7 +8,7 @@ type JoinRoomResult =
     | {ok: false, error: string}
 
 type LeaveRoomResult =
-    | {ok: true}
+    | {ok: true, code: string}
     | {ok: false, error: string}
 
 type StartGameResult =

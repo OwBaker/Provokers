@@ -45,9 +45,78 @@ class RoomManager {
         return { ok: false, error: `Room ${code} does not exist`};
     }
 
-    leaveRoom(playerId: PlayerId): LeaveRoomResult
-    startGame(playerId: PlayerId): StartGameResult
-    getRoomOf(playerId: PlayerId): string | null
+    public leaveRoom(playerId: PlayerId): LeaveRoomResult {
+        const roomId = this.playerRooms.get(playerId);
+
+        if (roomId === undefined) {
+            return { ok: false, error: "Player not in room" };
+        } else {
+            try {
+                this.removePlayer(playerId, roomId);
+                return { ok: true, code: roomId};
+            } catch (e) {
+                if (e instanceof Error) {
+                    return { ok: false, error: e.message };
+                }
+                return { ok:false, error: "unknown error" };
+            }
+        }
+    }
+
+    public startGame(playerId: PlayerId): StartGameResult {
+        const playerRoom = this.playerRooms.get(playerId);
+        if (playerRoom === undefined) {
+            return { ok: false, error: "Player not in room"};
+        }
+
+        const roomData = this.roomDB.get(playerRoom);
+        if (roomData === undefined) {
+            return { ok: false, error: "Invalid room code"}; // should never happen
+        }
+
+        if (playerId != roomData.hostId) {
+            return { ok: false, error: "player is not host"};
+        }
+
+        if (roomData.players.length < 2) {
+            return { ok: false, error: "not enough players to start"};
+        }
+
+        return { ok: true};
+    }
+
+    public getRoomOf(playerId: PlayerId): string | null {
+        const room = this.playerRooms.get(playerId);
+        if (room === undefined) {
+            return null;
+        }
+        return room;
+    }
+
+    public getRoom(code: string): roomData | null {
+        return this.roomDB.get(code) ?? null;
+    }
+
+    private removePlayer(playerId: PlayerId, roomCode: string) : void {
+        let roomData = this.roomDB.get(roomCode);
+
+        if (roomData === undefined) {
+            throw new Error("undefined room code");
+        }
+
+        this.playerRooms.delete(playerId);
+
+        roomData.players = roomData.players.filter(p => p.id !== playerId);
+
+        if (roomData.players.length === 0) {
+            this.roomDB.delete(roomCode);
+            this.roomCodes.delete(roomCode);
+        } else {
+            if (roomData.hostId === playerId) {
+                roomData.hostId = roomData.players[0].id;
+            }
+        }
+    }
 
     private initPlayer(playerId: PlayerId, playerName: string): Player {
         return { id: playerId, name: playerName };
