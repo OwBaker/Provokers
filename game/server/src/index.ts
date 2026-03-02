@@ -18,8 +18,11 @@ io.on("connection", (socket) => {
       const code = manager.getRoomOf(socket.id);
       if (code) {
           manager.leaveRoom(socket.id);
+          socket.emit("clientLeft");
           socket.leave(code);
-          io.to(code).emit("playerLeft", "a player left the room");
+          const room = manager.getRoom(code);
+          io.to(code).emit("playerLeft", { players: room?.players ?? [] });
+          console.log('player left');
       }
   };
 
@@ -47,6 +50,7 @@ io.on("connection", (socket) => {
       socket.join(code);
       io.to(code).emit("roomJoined", `${playerName} joined room ${code}`);
       const room = manager.getRoom(code);
+      io.to(code).emit("playerJoined", { players: room?.players })
       socket.emit("roomData", { code: code, players: room?.players, isHost: false});
     } else {
       socket.emit("error", `join room failed: ${joinReq.error}`);
@@ -54,9 +58,17 @@ io.on("connection", (socket) => {
   });
 
   socket.on("startGame", () => {
+    console.log("startgame recieved");
     const startReq = manager.startGame(socket.id);
     const code = manager.getRoomOf(socket.id);
     if (startReq.ok == true) {
+      console.log("sending gamestart");
+      console.log(code);
+      // (async () => {
+      //   const sockets = await io.in(code!).fetchSockets();
+      //   console.log("sockets in room:", sockets.map(s => s.id));
+      //   io.emit("gameStarted", "Game started by host");
+      // })();
       io.to(code!).emit("gameStarted", "Game started by host");
     } else {
       socket.emit("error", `Game failed to start: ${startReq.error}`);

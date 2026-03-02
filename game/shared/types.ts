@@ -23,3 +23,9 @@ export interface GameState {
     currentPlayerIndex: number;
     board: Tile[][]; // [y][x] = [row][column]
 }
+
+export interface RoomData {
+    code: string,
+    players: Player[],
+    hostId: PlayerId
+}
