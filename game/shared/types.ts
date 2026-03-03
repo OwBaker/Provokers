@@ -1,9 +1,22 @@
 export type PlayerId = string;
 
+// interface used for room setup
 export interface Player {
     id: PlayerId;
     name: string;
 }
+
+// interface used for game logic
+export interface InGamePlayer {
+    id: PlayerId;
+    name: string;
+    flaw: Flaw;
+    position: Position;
+    health: number;
+    actionPoints: number;
+}
+
+export type Flaw = "farsighted" | "bloodlust" | "offensive-minded" | "weakling";
 
 export interface Position {
     x: number;
@@ -15,13 +28,12 @@ export interface Tile {
     passable: boolean;
 }
 
-export type GamePhase = "placeholder" | "otherplaceholder";
+export type GamePhase = "pickingRoles" | "otherplaceholder";
 
 export interface GameState {
     phase: GamePhase;
-    players: Player[]
-    currentPlayerIndex: number;
-    board: Tile[][]; // [y][x] = [row][column]
+    players: InGamePlayer[]
+    order: string[];
 }
 
 export interface RoomData {
