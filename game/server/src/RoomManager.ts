@@ -1,4 +1,4 @@
-import type { PlayerId, Player } from "shared/types";
+import type { PlayerId, Player, CreateRoomResult, JoinRoomResult, LeaveRoomResult, StartGameResult } from "../../shared/types";
 
 interface roomData {
     code: string,

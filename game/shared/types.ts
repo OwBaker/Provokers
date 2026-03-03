@@ -1,12 +1,12 @@
 export type PlayerId = string;
 
-// interface used for room setup
+// player interface used for room setup
 export interface Player {
     id: PlayerId;
     name: string;
 }
 
-// interface used for game logic
+// player interface used for game logic
 export interface InGamePlayer {
     id: PlayerId;
     name: string;
@@ -14,6 +14,7 @@ export interface InGamePlayer {
     position: Position;
     health: number;
     actionPoints: number;
+    hasSubmitted: boolean;
 }
 
 export type Flaw = "farsighted" | "bloodlust" | "offensive-minded" | "weakling";
@@ -28,12 +29,15 @@ export interface Tile {
     passable: boolean;
 }
 
-export type GamePhase = "pickingRoles" | "otherplaceholder";
+export type GamePhase = "setup" | "actionPhase" | "resolvePhase" | "preAction";
 
 export interface GameState {
     phase: GamePhase;
     players: InGamePlayer[]
-    order: string[];
+    order: PlayerId[];
+    activeTurn: PlayerId | null;
+    round: number;
+    winner: PlayerId | null
 }
 
 export interface RoomData {
@@ -41,3 +45,47 @@ export interface RoomData {
     players: Player[],
     hostId: PlayerId
 }
+
+export type Action =
+    | { type: "move" }
+    | { type: "attack" }
+    | { type: "moveattack" }
+    | { type: "movedefend" }
+    | { type: "fortify" }
+    | { type: "defend" };
+
+export type ActionTarget = { coords: Position }
+
+
+export interface PendingAction {
+    playerId: PlayerId;
+    action: Action;
+}
+
+export type CreateRoomResult =
+    | {ok: true, code: string}
+    | {ok: false, error: string}
+
+export type JoinRoomResult =
+    | {ok: true}
+    | {ok: false, error: string}
+
+export type LeaveRoomResult =
+    | {ok: true, code: string}
+    | {ok: false, error: string}
+
+export type StartGameResult =
+    | {ok: true}
+    | {ok: false, error: string}
+
+export type InitGameResult =
+    | { ok: true; state: GameState }
+    | { ok: false; error: string };
+
+export type SubmitActionResult =
+    | { ok: true; state: GameState }
+    | { ok: false; error: string };
+
+export type ResolveNextResult =
+    | { ok: true; state: GameState }
+    | { ok: false; error: string };

@@ -1,0 +1,6 @@
+import { Server, Socket } from "socket.io";
+import GameManager from "./GameManager";
+
+export function registerGameHandlers(io: Server, socket: Socket, manager: GameManager) {
+    
+}
