@@ -15,6 +15,7 @@ export interface InGamePlayer {
     health: number;
     actionPoints: number;
     hasSubmitted: boolean;
+    roundsOnWinSpace: number;
 }
 
 export type Flaw = "farsighted" | "bloodlust" | "offensive-minded" | "weakling";
@@ -29,7 +30,7 @@ export interface Tile {
     passable: boolean;
 }
 
-export type GamePhase = "setup" | "actionPhase" | "resolvePhase" | "preAction";
+export type GamePhase = "end" | "actionPhase" | "resolvePhase" | "preAction";
 
 export interface GameState {
     phase: GamePhase;
@@ -38,6 +39,8 @@ export interface GameState {
     activeTurn: PlayerId | null;
     round: number;
     winner: PlayerId | null
+    currentAction: Action | null,
+    winSpaceOccupied: "no" | "oneP" | "twoP"
 }
 
 export interface RoomData {
@@ -54,7 +57,9 @@ export type Action =
     | { type: "fortify" }
     | { type: "defend" };
 
-export type ActionTarget = { coords: Position }
+// only multi-actions make use of "target"
+export type ActionTarget =
+    | {coords: Position, target: Position | null}
 
 
 export interface PendingAction {
@@ -89,3 +94,7 @@ export type SubmitActionResult =
 export type ResolveNextResult =
     | { ok: true; state: GameState }
     | { ok: false; error: string };
+
+export type PreActionResult =
+    | { added: true, state: GameState }
+    | { added: false, state: GameState }
