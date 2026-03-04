@@ -1,7 +1,8 @@
 import { Server, Socket } from "socket.io";
 import RoomManager from "./RoomManager";
+import { EventEmitter } from "stream";
 
-export function registerRoomHandlers(io: Server, socket: Socket, manager: RoomManager) {
+export function registerRoomHandlers(io: Server, socket: Socket, manager: RoomManager, serverEvents: EventEmitter) {
 
     const handleLeave = () => {
         const code = manager.getRoomOf(socket.id);
@@ -47,7 +48,9 @@ export function registerRoomHandlers(io: Server, socket: Socket, manager: RoomMa
         const result = manager.startGame(socket.id);
         const code = manager.getRoomOf(socket.id);
         if (result.ok) {
+            const roomData = manager.getRoom(code!)!;
             console.log("sending gameStarted to room", code);
+            serverEvents.emit("gameReady", code, roomData.players);
             io.to(code!).emit("gameStarted", "Game started by host");
         } else {
             socket.emit("error", `Game failed to start: ${result.error}`);
