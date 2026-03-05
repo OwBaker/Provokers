@@ -1,22 +1,30 @@
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useRef } from 'react';
 import { socket } from '../socket';
-import type { RoomData, Player } from '../../../shared/types';
+import type { RoomData, Player, GameState } from '../../../shared/types';
 import { useNavigate } from 'react-router-dom';
 
 export interface GameContextType {
     roomData: RoomData | null,
     error: string | null,
+    gameState: GameState | null
     setRoomData: (data: RoomData) => void,
     setError: (error: string) => void
+    setGameState: (state: GameState) => void;
 }
 
 const GameContext = createContext<GameContextType | null>(null);
 
 export function GameProvider({ children }: {children: React.ReactNode }) : React.ReactElement {
     const [roomData, setRoomData] = useState<RoomData | null>(null);
+    const roomDataRef = useRef<RoomData | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const [gameState, setGameState] = useState<GameState | null>(null);
     const navigate = useNavigate();
+    const gameStateRef = useRef<GameState | null>(null);
+
+    useEffect(() => { roomDataRef.current = roomData; }, [roomData]);
+    useEffect(() => { gameStateRef.current = gameState; }, [gameState]);
 
     useEffect( () => {
         socket.on("roomData", (data: RoomData) => {
@@ -46,6 +54,19 @@ export function GameProvider({ children }: {children: React.ReactNode }) : React
             navigate("/game");
         });
 
+        socket.on("gameState", (state: GameState) => {
+            setGameState(state);
+        });
+
+        socket.on("requestVerify", () => {
+            socket.emit("verify", roomDataRef.current!.code, gameStateRef.current);
+        });
+
+        socket.on("gameOver", (state: GameState) => {
+            setGameState(state);
+            navigate("/end");
+        })
+
         return () => {
                 socket.off("roomData");
                 socket.off("playerLeft");
@@ -58,7 +79,7 @@ export function GameProvider({ children }: {children: React.ReactNode }) : React
     }, []);
 
     return (
-        <GameContext.Provider value={{ roomData, setRoomData, error, setError }}>
+        <GameContext.Provider value={{ roomData, setRoomData, error, setError, gameState, setGameState }}>
             {children}
         </GameContext.Provider>
     )

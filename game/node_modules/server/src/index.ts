@@ -19,8 +19,13 @@ const gameManager = new GameManager();
 const serverEvents = new EventEmitter();
 
 serverEvents.on("gameReady", (code: string, players: Player[]) => {
+    console.log("initializing...");
     const result = gameManager.initGame(code, players);
-    if (result.ok) io.to(code).emit("gameState", result.state);
+    if (result.ok) {
+      io.to(code).emit("gameState", result.state)
+    } else {
+      console.log(result.error);
+    }
 });
 
 io.on("connection", (socket) => {

@@ -40,11 +40,13 @@ export function registerGameHandlers(io: Server, socket: Socket, gameManager: Ga
     });
 
     socket.on("verify", (roomCode: string, state: GameState) => {
+        console.log("verifying...");
         const verifyReq = gameManager.preAction(roomCode, socket.id, state);
 
         if (verifyReq.added === true) {
             io.to(roomCode).emit("gameState", verifyReq.state)
         } else {
+            socket.emit("gameState", verifyReq.state);
             socket.emit("requestVerify");
         }
     });

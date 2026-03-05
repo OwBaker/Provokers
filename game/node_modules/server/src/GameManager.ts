@@ -16,16 +16,16 @@ class GameManager {
     // initializes gameState for the given game, creates InGamePlayers for each player
     public initGame(roomCode: string, players: Player[]) : InitGameResult {
         try {
-            let gamePlayers = this.distributeFlaws(players);
+            let gamePlayers: InGamePlayer[] = this.distributeFlaws(players);
+
             
-            gamePlayers[1].position = {x: 0, y: 8}
-            gamePlayers[2].position = {x: 8, y: 0}
-            gamePlayers[3].position = {x: 8, y: 8}
+            const startingPositions = [{x:0,y:0},{x:0,y:8},{x:8,y:0},{x:8,y:8}];
+            gamePlayers.forEach((p, i) => p.position = startingPositions[i]);
 
             const gameState: GameState = {
                 phase: "actionPhase",
                 players: gamePlayers,
-                order: Array.of(gamePlayers[0].id, gamePlayers[1].id, gamePlayers[2].id, gamePlayers[3].id),
+                order: gamePlayers.map((p) => {return p.id}),
                 activeTurn: null,
                 round: 1,
                 winner: null,
