@@ -41,6 +41,7 @@ export interface GameState {
     winner: PlayerId | null
     currentAction: Action | null,
     winSpaceOccupied: "no" | "oneP" | "twoP"
+    zeroTarget: boolean
 }
 
 export interface RoomData {

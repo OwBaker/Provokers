@@ -55,10 +55,19 @@ export function GameProvider({ children }: {children: React.ReactNode }) : React
         });
 
         socket.on("gameState", (state: GameState) => {
+            console.log("state updated: ", state);
             setGameState(state);
         });
 
+        socket.on("verifyState", (state: GameState) => {
+            console.log("updating client state...");
+            setGameState(state);
+            console.log("verifying...");
+            socket.emit("verify", roomDataRef.current!.code, gameStateRef.current);
+        })
+
         socket.on("requestVerify", () => {
+            console.log("sending state for verification");
             socket.emit("verify", roomDataRef.current!.code, gameStateRef.current);
         });
 
@@ -74,6 +83,7 @@ export function GameProvider({ children }: {children: React.ReactNode }) : React
                 socket.off("error");
                 socket.off("gameStarted");
                 socket.off("clientLeft");
+                socket.off("verifyState");
             }
 
     }, []);

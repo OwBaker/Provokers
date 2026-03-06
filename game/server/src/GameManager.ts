@@ -1,4 +1,3 @@
-import { BlobOptions } from "buffer";
 import { ActionTarget, GameState, InGamePlayer, Player, PlayerId, Flaw, InitGameResult, SubmitActionResult, ResolveNextResult, Action, PendingAction, GamePhase, Position, RoomData, PreActionResult} from "../../shared/types";
 
 
@@ -8,7 +7,6 @@ class GameManager {
 
     private gameDataMap: Map<string, GameState> = new Map();
     private pendingActions: Map<string, PendingAction[]> = new Map();
-    private resolutionTimers: Map<string, NodeJS.Timeout> = new Map();
     private defenders: Map<string, Array<PlayerId>> = new Map();
     private verified: Map<string, Array<PlayerId>> = new Map();
 
@@ -19,7 +17,7 @@ class GameManager {
             let gamePlayers: InGamePlayer[] = this.distributeFlaws(players);
 
             
-            const startingPositions = [{x:0,y:0},{x:0,y:8},{x:8,y:0},{x:8,y:8}];
+            const startingPositions = [{x:4,y:4},{x:4,y:7},{x:8,y:0},{x:8,y:8}];
             gamePlayers.forEach((p, i) => p.position = startingPositions[i]);
 
             const gameState: GameState = {
@@ -30,7 +28,8 @@ class GameManager {
                 round: 1,
                 winner: null,
                 currentAction: null,
-                winSpaceOccupied: "no"
+                winSpaceOccupied: "no",
+                zeroTarget: false
             }
 
             this.gameDataMap.set(roomCode, gameState);
@@ -85,6 +84,7 @@ class GameManager {
             return {ok: false, error: "No game with given code exists"}
         }
 
+        let targetless = false;
         let currentState = this.gameDataMap.get(roomCode)!;
         const roomPending = this.pendingActions.get(roomCode)!;
         const pending = roomPending.find(p => p.playerId === currentState.activeTurn)!;
@@ -116,6 +116,7 @@ class GameManager {
             }
             
         } else {
+            targetless = true;
             switch (action.type) {
                 case "defend" :
                     this.defend(roomCode, actor);
@@ -147,13 +148,13 @@ class GameManager {
         }
 
         resultState = this.gameDataMap.get(roomCode)!;
-        return { ok: true, state: resultState};
+        return { ok: true, state: {...resultState, zeroTarget: targetless}};
     }
 
     public preAction(roomCode: string, playerId: PlayerId, state: GameState) : PreActionResult {
         let verified = this.verified.get(roomCode)!;
 
-        if (JSON.stringify(state) === JSON.stringify(this.gameDataMap.get(roomCode)!)) {
+        if (state.round == this.gameDataMap.get(roomCode!)?.round) {
             verified.push(playerId);
         } else {
             return { added: false, state: this.gameDataMap.get(roomCode)!};
@@ -171,6 +172,7 @@ class GameManager {
             this.gameDataMap.get(roomCode)!.round += 1;
             this.gameDataMap.get(roomCode)!.phase = "actionPhase";
         }
+        console.log("all are verified :D");
         return { added: true, state: this.gameDataMap.get(roomCode)! };
     }
 
@@ -269,7 +271,12 @@ class GameManager {
                         break
                     }
                 }
+                
+                const xdiff = Math.abs(position.x - player.position.x);
+                const ydiff = Math.abs(position.y - player.position.y);
+                const pointsSpent = xdiff + ydiff;
 
+                this.reduceActionPoints(roomCode, playerId, pointsSpent);
                 player.position = position;
                 return;
             }
@@ -280,12 +287,21 @@ class GameManager {
         return GameManager.winCoords.some(w => w.x === pos.x && w.y === pos.y);
     }
 
-    private isMultiAction(action: Action) : boolean {
-        return action.type === "movedefend" || action.type == "moveattack";
+    private reduceActionPoints(roomCode: string, playerId: PlayerId, amount: number) {
+        let players = this.gameDataMap.get(roomCode)!.players;
+        for (const player of players) {
+            if (player.id == playerId) {
+                player.actionPoints -= amount;
+                if (player.actionPoints <= 0) {
+                    player.actionPoints = 1;
+                }
+            }
+        }
     }
 
     private attack(roomCode: string, playerId: PlayerId, coords: Position) {
         const attack = this.isPlayerAt(roomCode, coords);
+        this.reduceActionPoints(roomCode, playerId, 1);
         if (attack.bool) {
             for (const player of this.gameDataMap.get(roomCode)!.players) {
                 if (player.id === attack.playerId && !this.isDefending(roomCode, player.id)) {
