@@ -47,7 +47,11 @@ export default function Game() {
         }
     }
 
-    return <div className="justify-center items-center flex h-screen w-screen">
+    return (<span>
+        <div className="justify-center items-center flex my-2.5">
+            <h1 className='font-bold text-6xl'>Round #{gameState.round}</h1>
+        </div>
+        <div className="justify-center items-center flex h-full w-screen">
         <Board
             gameState={gameState}
             isMyTurn={isMyTurn(gameState)}
@@ -64,15 +68,7 @@ export default function Game() {
                 onSelectedAction={onSelectedAction}
             />
         <PlayerInfo gameState={gameState}/>
-        </div>
-        
-
-    // if (gameState.phase === "actionPhase") return <div>Action Phase</div>;
-    // if (gameState.phase === "resolvePhase") return <div>Resolve Phase</div>;
-    // if (gameState.phase === "preAction") return <div>Syncing...</div>;
-    // if (gameState.phase === "end") return <div>Game Over</div>;
-
-    return null;
+        </div></span>)
 }
 
 function isMyTurn(gameState: GameState) : boolean {

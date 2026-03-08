@@ -237,6 +237,7 @@ class GameManager {
 
     private defend(roomCode: string, playerId: PlayerId) {
         this.defenders.get(roomCode)!.push(playerId);
+        this.reduceActionPoints(roomCode, playerId, 1);
     }
 
     private move(roomCode: string, playerId: PlayerId, position: Position) {
@@ -315,7 +316,9 @@ class GameManager {
     private fortify(roomCode: string, playerId: PlayerId) {
         for (const player of this.gameDataMap.get(roomCode)!.players) {
             if (player.id === playerId) {
-                player.actionPoints += 1;
+                if (player.actionPoints < 4) {
+                    player.actionPoints += 1;
+                }
             }
         }
     }

@@ -67,7 +67,7 @@ export function GameProvider({ children }: {children: React.ReactNode }) : React
         })
 
         socket.on("requestVerify", () => {
-            console.log("sending state for verification");
+            console.log("sending state for verification", gameStateRef.current);
             socket.emit("verify", roomDataRef.current!.code, gameStateRef.current);
         });
 

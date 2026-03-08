@@ -17,12 +17,15 @@ type BoardProps = {
 export default function Board({ gameState, isMyTurn, onSelectTarget, myPlayer, selectedAction, moveTargetRef }: BoardProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [hoveredCell, setHoveredCell] = useState<Position | null>(null);
+    const availableCells = useRef<Position[] | undefined>(undefined);
 
     function handleMouseClick(e: React.MouseEvent<HTMLCanvasElement>) {
         const pos = getCellFromMouse(e, canvasRef.current!);
-        if (gameState.phase == "resolvePhase" && isMyTurn == true){
+        if (availableCells.current && availableCells.current.some(posi => posi.x == pos.x && posi.y == pos.y)) {
+            if (gameState.phase == "resolvePhase" && isMyTurn == true){
             console.log("target selected");
             onSelectTarget(pos);
+        }
         }
     }
 
@@ -79,6 +82,7 @@ export default function Board({ gameState, isMyTurn, onSelectTarget, myPlayer, s
                 }
             }
         }
+        availableCells.current = cells;
     }
 
     function drawPlayers(ctx: CanvasRenderingContext2D, players: InGamePlayer[]) {
