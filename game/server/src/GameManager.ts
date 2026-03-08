@@ -1,5 +1,11 @@
 import { ActionTarget, GameState, InGamePlayer, Player, PlayerId, Flaw, InitGameResult, SubmitActionResult, ResolveNextResult, Action, PendingAction, GamePhase, Position, RoomData, PreActionResult} from "../../shared/types";
 
+// FLAWS AT THE MOMENT: farsighted, bloodlust, offensive-minded, weakling
+// far-sighted: affects where you can attack, client side
+// bloodlust: depends on how many rounds pass before you attack, server side
+// offensive-minded: effects cost of defend action, server side
+// weakling: depends if you're attacked before you attack, server side
+
 
 class GameManager {
     private static flaws: Flaw[] = Array.of("farsighted", "bloodlust", "offensive-minded", "weakling");
@@ -17,7 +23,7 @@ class GameManager {
             let gamePlayers: InGamePlayer[] = this.distributeFlaws(players);
 
             
-            const startingPositions = [{x:4,y:4},{x:4,y:7},{x:8,y:0},{x:8,y:8}];
+            const startingPositions = [{x:0,y:0},{x:0,y:9},{x:9,y:0},{x:9,y:9}];
             gamePlayers.forEach((p, i) => p.position = startingPositions[i]);
 
             const gameState: GameState = {
@@ -78,7 +84,7 @@ class GameManager {
         }
     }
 
-    // resolves actions ig
+    // main method for resolving actions in resolvePhase
     public resolveNext(roomCode: string, actionTarget: ActionTarget | null) : ResolveNextResult {
         if (this.gameDataMap.get(roomCode) === undefined) {
             return {ok: false, error: "No game with given code exists"}

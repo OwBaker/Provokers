@@ -46,6 +46,14 @@ export default function ActionPanel({ gameState, myPlayer, roomCode, isMyTurn, s
         onSelectedAction({ type: "moveattack" });
     }
 
+    const actionButtons = [
+        {action: "Move", onclick: () => move(roomCode), minPoints: 1, maxPoints: 4},
+        {action: "Attack", onclick: () => attack(roomCode), minPoints: 1, maxPoints: null},
+        {action: "Defend", onclick: () => defend(roomCode), minPoints: 1, maxPoints: null},
+        {action: "Fortify", onclick: () => fortify(roomCode), minPoints: 0, maxPoints: null},
+        {action: "Move + Defend", onclick: () => movedefend(roomCode), minPoints: 2, maxPoints: 4},
+        {action: "Move + Attack", onclick: () => moveattack(roomCode), minPoints: 2, maxPoints: 4}]
+
     if (gameState.phase == "preAction") {
         return (<div>Syncing with server...</div>)
     }
@@ -54,7 +62,17 @@ export default function ActionPanel({ gameState, myPlayer, roomCode, isMyTurn, s
         return (<div>Waiting for players...</div>)
     } else if (gameState.phase == "actionPhase" && !myPlayer!.hasSubmitted) {
         return (<div>
-            <div>
+            <ul>
+                {actionButtons.map((button) => {
+                    if (myPlayer!.actionPoints >= button.minPoints) {
+                        if (button.maxPoints) {
+                            return <li><button className="outline-1 my-1.5 text-3xl mx-1" onClick={button.onclick}>{button.action} <p>{button.minPoints}-{button.maxPoints} AP</p></button></li>
+                        }
+                        return <li><button className="outline-1  my-1.5 text-3xl mx-1" onClick={button.onclick}>{button.action}<p>{button.minPoints} AP</p></button></li>
+                    }
+                })}
+            </ul>
+            {/* <div>
                 <button className="outline-1 my-1.5 text-3xl"
                         onClick={() => {move(roomCode)}}>
                 Move
@@ -89,7 +107,7 @@ export default function ActionPanel({ gameState, myPlayer, roomCode, isMyTurn, s
                         onClick={() => {movedefend(roomCode)}}>
                 Move + Defend
                 </button>
-            </div>
+            </div> */}
         </div>)
     }
 
