@@ -5,6 +5,7 @@ import { GameProvider } from './context/GameContext.tsx';
 import Home from './pages/Home.tsx';
 import Game from './pages/Game.tsx';
 import Room from './pages/Room.tsx';
+import GameOver from './pages/End.tsx';
 
 import { createBrowserRouter, Outlet, RouterProvider } from 'react-router-dom'
 
@@ -14,7 +15,8 @@ const router = createBrowserRouter([
     children: [
       { path: "/", element: <Home />},
       { path: "/room", element: <Room />},
-      { path: "/game", element: <Game />}
+      { path: "/game", element: <Game />},
+      { path: "/end", element: <GameOver />}
     ]
   }
 ]);

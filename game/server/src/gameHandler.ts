@@ -53,11 +53,13 @@ export function registerGameHandlers(io: Server, socket: Socket, gameManager: Ga
                 if (next?.phase === "preAction") {
                     io.to(roomCode).emit("requestVerify");
                 } else if (next?.phase == "end") {
+                    console.log("game is joever");
                     io.to(roomCode).emit("gameOver");
                 }
             } else if (resolveReq!.phase === "preAction") {
                 io.to(roomCode).emit("requestVerify");
             } else if (resolveReq!.phase === "end") {
+                console.log("game is joever");
                 io.to(roomCode).emit("gameOver", resolveReq);
             }
         

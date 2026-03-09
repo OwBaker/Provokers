@@ -145,6 +145,7 @@ class GameManager {
             this.gameDataMap.get(roomCode)!.activeTurn = next;
         } else {
             if (this.checkWinConditions(roomCode)) {
+                console.log("game is joever");
                 this.gameDataMap.get(roomCode)!.phase = "end";
             } else {
                 this.gameDataMap.get(roomCode)!.phase = "preAction";
@@ -204,6 +205,7 @@ class GameManager {
         // living players check
         let alive = new Array();
         for (const player of data.players) {
+            console.log("health: ", player.health)
             if (player.health > 0) {
                 alive.push(player.id);
             }
@@ -214,6 +216,7 @@ class GameManager {
             return true;
         }
 
+        console.log("still at least 2 alive", alive);
         return false;
 
     }
@@ -235,10 +238,21 @@ class GameManager {
         const order = this.gameDataMap.get(roomCode)!.order;
         for (let i = 0; i < order.length; i++) {
             if (order[i] === currentPlayer && i < order.length - 1) {
-                return order[i + 1];
+                if (this.getPlayerFromId(roomCode, order[i + 1])!.health > 0) {
+                    return order[i + 1];
+                }
             }
         }
         return false;
+    }
+
+    private getPlayerFromId(roomCode: string, playerId: PlayerId) : InGamePlayer | null {
+        for (const player of this.gameDataMap.get(roomCode)!.players) {
+            if (player.id == playerId) {
+                return player;
+            }
+        }
+        return null;
     }
 
     private defend(roomCode: string, playerId: PlayerId) {
