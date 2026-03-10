@@ -3,7 +3,6 @@ import type { Action, GameState, InGamePlayer, Position } from "../../../shared/
 import { BOARD } from "../../../shared/board";
 
 const CELL_SIZE = 64;
-const PLAYER_COLORS = ["red", "orange", "blue", "purple"]
 
 type BoardProps = {
     gameState: GameState;
@@ -108,7 +107,7 @@ export default function Board({ gameState, isMyTurn, onSelectTarget, myPlayer, s
     }
 
     function drawPlayers(ctx: CanvasRenderingContext2D, players: InGamePlayer[]) {
-    players.forEach((player, i) => {
+    players.forEach((player) => {
         const pos = (player.id === myPlayer.id && moveTargetRef.current)
             ? moveTargetRef.current
             : player.position;

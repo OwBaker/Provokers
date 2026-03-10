@@ -1,7 +1,6 @@
 
 import type { GameState, InGamePlayer, PlayerId } from "../../../shared/types";
 
-const PLAYER_COLORS = ["red", "orange", "blue", "purple"]
 
 type PlayerInfoProps = {
     gameState: GameState;
@@ -33,7 +32,7 @@ export default function PlayerInfo({ gameState, myPlayer }: PlayerInfoProps) {
 
     return (<div>
         <ul>
-            {playerData.map((player: InGamePlayer, i: number) => {
+            {playerData.map((player: InGamePlayer) => {
                 let me;
                 if (player.id == myPlayer.id) {
                     me = true;

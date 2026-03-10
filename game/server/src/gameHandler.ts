@@ -30,6 +30,9 @@ export function registerGameHandlers(io: Server, socket: Socket, gameManager: Ga
                 if (resolveReq!.phase === "preAction") {
                     console.log("all targetless, requesting verify");
                     io.to(roomCode).emit("requestVerify");
+                } else if (resolveReq!.phase === "end") {
+                    console.log("all targetless, ending game");
+                    io.to(roomCode).emit("gameOver", resolveReq);
                 } else {
                     io.to(roomCode).emit("gameState", resolveReq);
                 }
@@ -50,16 +53,16 @@ export function registerGameHandlers(io: Server, socket: Socket, gameManager: Ga
                 console.log("still in resolve");
                 const next = resolveLoop(roomCode, null);
                 io.to(roomCode).emit("gameState", next);
-                if (next?.phase === "preAction") {
+                if (next!.phase === "preAction") {
                     io.to(roomCode).emit("requestVerify");
-                } else if (next?.phase == "end") {
-                    console.log("game is joever");
-                    io.to(roomCode).emit("gameOver");
+                } else if (next!.phase == "end") {
+                    console.log("game is joever!");
+                    io.to(roomCode).emit("gameOver", resolveReq);
                 }
             } else if (resolveReq!.phase === "preAction") {
                 io.to(roomCode).emit("requestVerify");
             } else if (resolveReq!.phase === "end") {
-                console.log("game is joever");
+                console.log("game is joeverrrrrr");
                 io.to(roomCode).emit("gameOver", resolveReq);
             }
         

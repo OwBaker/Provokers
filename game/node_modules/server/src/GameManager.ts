@@ -141,7 +141,7 @@ class GameManager {
             roomCode,
             this.pendingActions.get(roomCode)!.filter(p => p.playerId !== actor)
         );
-        this.updateWinSpaces(roomCode);
+        
         this.gameDataMap.get(roomCode)!.currentAction = null;
 
         this.checkForDeaths(roomCode);
@@ -158,6 +158,7 @@ class GameManager {
                 console.log("game is joever");
                 this.gameDataMap.get(roomCode)!.phase = "end";
             } else {
+                this.updateWinSpaces(roomCode);
                 this.gameDataMap.get(roomCode)!.phase = "preAction";
                 this.pendingActions.set(roomCode, []);
                 this.defenders.set(roomCode, []);
@@ -170,6 +171,10 @@ class GameManager {
 
     public preAction(roomCode: string, playerId: PlayerId, state: GameState) : PreActionResult {
         let verified = this.verified.get(roomCode)!;
+
+        if (state == null) {
+            return { added: false, state: this.gameDataMap.get(roomCode)!};
+        }
 
         if (state.round == this.gameDataMap.get(roomCode!)?.round) {
             verified.push(playerId);
