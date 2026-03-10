@@ -47,28 +47,46 @@ export default function Game() {
         }
     }
 
-    return (<span>
-        <div className="justify-center items-center flex my-2.5">
-            <h1 className='font-bold text-6xl'>Round #{gameState.round}</h1>
-        </div>
-        <div className="justify-center items-center flex h-full w-screen">
-        <Board
-            gameState={gameState}
-            isMyTurn={isMyTurn(gameState)}
-            myPlayer={getMyPlayer(gameState)!}
-            selectedAction={selectedAction}
-            moveTargetRef={localPosRef}
-            onSelectTarget={onSelectedTarget} />
-            <ActionPanel
+    if (getMyPlayer(gameState)!.health > 0) {
+        return (<span>
+            <div className="justify-center items-center flex my-2.5">
+                <h1 className='font-bold text-6xl'>Round #{gameState.round}</h1>
+            </div>
+            <div className="justify-center items-center flex h-full w-screen">
+            <Board
                 gameState={gameState}
-                myPlayer={getMyPlayer(gameState)}
-                roomCode={roomData!.code}
                 isMyTurn={isMyTurn(gameState)}
+                myPlayer={getMyPlayer(gameState)!}
                 selectedAction={selectedAction}
-                onSelectedAction={onSelectedAction}
-            />
-        <PlayerInfo gameState={gameState}/>
-        </div></span>)
+                moveTargetRef={localPosRef}
+                onSelectTarget={onSelectedTarget} />
+                <ActionPanel
+                    gameState={gameState}
+                    myPlayer={getMyPlayer(gameState)}
+                    roomCode={roomData!.code}
+                    isMyTurn={isMyTurn(gameState)}
+                    selectedAction={selectedAction}
+                    onSelectedAction={onSelectedAction}
+                />
+            <PlayerInfo gameState={gameState}/>
+            </div></span>)
+        }
+    
+    return (<span>
+            <div className="justify-center items-center flex my-2.5">
+                <h1 className='font-bold text-6xl'>Round #{gameState.round}</h1>
+            </div>
+            <div className="justify-center items-center flex h-full w-screen">
+            <Board
+                gameState={gameState}
+                isMyTurn={isMyTurn(gameState)}
+                myPlayer={getMyPlayer(gameState)!}
+                selectedAction={selectedAction}
+                moveTargetRef={localPosRef}
+                onSelectTarget={onSelectedTarget} />
+                <p className="my-2.5">You're dead...</p>
+            <PlayerInfo gameState={gameState}/>
+            </div></span>)
 }
 
 function isMyTurn(gameState: GameState) : boolean {

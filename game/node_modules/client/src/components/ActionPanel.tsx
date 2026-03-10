@@ -46,10 +46,17 @@ export default function ActionPanel({ gameState, myPlayer, roomCode, isMyTurn, s
         onSelectedAction({ type: "moveattack" });
     }
 
+    function getDefendCost() {
+        if (myPlayer!.flaw != "offensive-minded") {
+            return 1;
+        }
+        return 2;
+    }
+
     const actionButtons = [
         {action: "Move", onclick: () => move(roomCode), minPoints: 1, maxPoints: 4},
         {action: "Attack", onclick: () => attack(roomCode), minPoints: 1, maxPoints: null},
-        {action: "Defend", onclick: () => defend(roomCode), minPoints: 1, maxPoints: null},
+        {action: "Defend", onclick: () => defend(roomCode), minPoints: getDefendCost(), maxPoints: null},
         {action: "Fortify", onclick: () => fortify(roomCode), minPoints: 0, maxPoints: null},
         {action: "Move + Defend", onclick: () => movedefend(roomCode), minPoints: 2, maxPoints: 4},
         {action: "Move + Attack", onclick: () => moveattack(roomCode), minPoints: 2, maxPoints: 4}]
@@ -66,9 +73,9 @@ export default function ActionPanel({ gameState, myPlayer, roomCode, isMyTurn, s
                 {actionButtons.map((button) => {
                     if (myPlayer!.actionPoints >= button.minPoints) {
                         if (button.maxPoints) {
-                            return <li><button className="outline-1 my-1.5 text-3xl mx-1" onClick={button.onclick}>{button.action} <p>{button.minPoints}-{button.maxPoints} AP</p></button></li>
+                            return <li><button key={button.action} className="outline-1 my-1.5 text-3xl mx-1" onClick={button.onclick}>{button.action} <p>{button.minPoints}-{button.maxPoints} AP</p></button></li>
                         }
-                        return <li><button className="outline-1  my-1.5 text-3xl mx-1" onClick={button.onclick}>{button.action}<p>{button.minPoints} AP</p></button></li>
+                        return <li><button key={button.action} className="outline-1  my-1.5 text-3xl mx-1" onClick={button.onclick}>{button.action}<p>{button.minPoints} AP</p></button></li>
                     }
                 })}
             </ul>

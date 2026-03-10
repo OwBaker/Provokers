@@ -85,6 +85,28 @@ export default function Board({ gameState, isMyTurn, onSelectTarget, myPlayer, s
         availableCells.current = cells;
     }
 
+    function getAttackCells(pos: Position): Position[] {
+        if (myPlayer.flaw != "farsighted") {
+            return [
+            { x: pos.x - 1, y: pos.y }, // left
+            { x: pos.x - 2, y: pos.y }, // left
+            { x: pos.x + 1, y: pos.y }, // right
+            { x: pos.x + 2, y: pos.y }, // right
+            { x: pos.x, y: pos.y - 1 }, // above
+            { x: pos.x, y: pos.y - 2 }, // above
+            { x: pos.x, y: pos.y + 1 }, // below
+            { x: pos.x, y: pos.y + 2 }, // below
+        ].filter(p => p.x >= 0 && p.x < BOARD.length && p.y >= 0 && p.y < BOARD.length);
+        }
+        
+        return [
+            { x: pos.x - 2, y: pos.y }, // left
+            { x: pos.x + 2, y: pos.y }, // right
+            { x: pos.x, y: pos.y - 2 }, // above
+            { x: pos.x, y: pos.y + 2 }, // below
+        ].filter(p => p.x >= 0 && p.x < BOARD.length && p.y >= 0 && p.y < BOARD.length);
+    }
+
     function drawPlayers(ctx: CanvasRenderingContext2D, players: InGamePlayer[]) {
     players.forEach((player, i) => {
         const pos = (player.id === myPlayer.id && moveTargetRef.current)
@@ -123,19 +145,6 @@ function drawGrid(ctx: CanvasRenderingContext2D) {
             ctx.strokeRect(x * CELL_SIZE, y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
         }
     }
-}
-
-function getAttackCells(pos: Position): Position[] {
-    return [
-        { x: pos.x - 1, y: pos.y }, // left
-        { x: pos.x - 2, y: pos.y }, // left
-        { x: pos.x + 1, y: pos.y }, // right
-        { x: pos.x + 2, y: pos.y }, // right
-        { x: pos.x, y: pos.y - 1 }, // above
-        { x: pos.x, y: pos.y - 2 }, // above
-        { x: pos.x, y: pos.y + 1 }, // below
-        { x: pos.x, y: pos.y + 2 }, // below
-    ].filter(p => p.x >= 0 && p.x < BOARD.length && p.y >= 0 && p.y < BOARD.length);
 }
 
 function getMoveCells(gameState: GameState, pos: Position, player: InGamePlayer, reservedPoints: number) : Position[] {

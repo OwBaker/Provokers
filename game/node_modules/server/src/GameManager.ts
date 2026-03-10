@@ -15,6 +15,8 @@ class GameManager {
     private pendingActions: Map<string, PendingAction[]> = new Map();
     private defenders: Map<string, Array<PlayerId>> = new Map();
     private verified: Map<string, Array<PlayerId>> = new Map();
+    private bloodlustMap: Map<string, number> = new Map();
+    private weaklingMap: Map<string, boolean> = new Map();
 
 
     // initializes gameState for the given game, creates InGamePlayers for each player
@@ -42,6 +44,7 @@ class GameManager {
             this.defenders.set(roomCode, new Array());
             this.pendingActions.set(roomCode, new Array());
             this.verified.set(roomCode, new Array());
+            this.bloodlustMap.set(roomCode, 0);
 
             return {ok: true, state: gameState};
         } catch (e) {
@@ -140,10 +143,16 @@ class GameManager {
         this.updateWinSpaces(roomCode);
         this.gameDataMap.get(roomCode)!.currentAction = null;
 
+        this.checkForDeaths(roomCode);
+
         const next = this.getNextPlayer(roomCode, actor);
         if (next) {
             this.gameDataMap.get(roomCode)!.activeTurn = next;
         } else {
+            if (this.checkBloodLust(roomCode)) {
+                this.damageBloodLust(roomCode);
+            }
+
             if (this.checkWinConditions(roomCode)) {
                 console.log("game is joever");
                 this.gameDataMap.get(roomCode)!.phase = "end";
@@ -183,10 +192,39 @@ class GameManager {
         return { added: true, state: this.gameDataMap.get(roomCode)! };
     }
 
+    private checkForDeaths(roomCode: string) {
+        const players = this.gameDataMap.get(roomCode)!.players;
+        for (const player of players) {
+            if (player.health <= 0) {
+                this.gameDataMap.get(roomCode)!.order = this.gameDataMap.get(roomCode)!.order.filter((id) => {return id != player.id});
+            }
+        }
+    }
+
     private checkStateVerified(roomCode: string) : boolean {
         const verified = this.verified.get(roomCode)!;
         if (verified.length == this.gameDataMap.get(roomCode)!.players.length) {
             return true;
+        }
+        return false;
+    }
+
+    private damageBloodLust(roomCode: string) {
+        const game = this.gameDataMap.get(roomCode)!;
+        for (const player of game.players) {
+            if (player.flaw == "bloodlust") {
+                player.health -= 1;
+            }
+        }
+    }
+
+    private checkBloodLust(roomCode: string) {
+        const blood = this.bloodlustMap.get(roomCode);
+        if (blood != null) {
+            if (Math.abs(blood - this.gameDataMap.get(roomCode)!.round) >= 8) {
+                console.log("damage bloodlust!");
+                return true
+            }
         }
         return false;
     }
@@ -324,9 +362,20 @@ class GameManager {
         const attack = this.isPlayerAt(roomCode, coords);
         this.reduceActionPoints(roomCode, playerId, 1);
         if (attack.bool) {
+            const actor = this.getPlayerFromId(roomCode, playerId)!;
+            if (actor.flaw == 'bloodlust') {
+                this.bloodlustMap.set(roomCode, this.gameDataMap.get(roomCode)!.round);
+            } else if (actor.flaw == 'weakling' && !this.weaklingMap.get(roomCode)) {
+                actor.health += 1;
+                this.weaklingMap.set(roomCode, true);
+            }
+
             for (const player of this.gameDataMap.get(roomCode)!.players) {
                 if (player.id === attack.playerId && !this.isDefending(roomCode, player.id)) {
                     player.health -= 1;
+                    if (player.flaw == "weakling" && !this.weaklingMap.get(roomCode)) {
+                        this.weaklingMap.set(roomCode, true);
+                    }
                     return;
                 }
             }
@@ -389,14 +438,15 @@ class GameManager {
 
     private checkSubmissions(roomCode: string) : boolean {
         let submissions = 0;
-    
-        for (const player of this.gameDataMap.get(roomCode)!.players) {
+
+        const playerList = this.gameDataMap.get(roomCode)!.players.filter((player) => {return player.health > 0});
+        for (const player of playerList) {
             if (player.hasSubmitted === true) {
                 submissions += 1;
             }
         }
 
-        return submissions >= this.gameDataMap.get(roomCode)!.players.length;
+        return submissions >= playerList.length;
     }
 
 
@@ -411,7 +461,18 @@ class GameManager {
             newPlayers.push({ id: player.id, name: player.name, flaw: flaw, position: {x: 0, y: 0}, health: 3, actionPoints: 4, hasSubmitted: false, roundsOnWinSpace: 0});
             flaws.splice(rand, 1);
         }
+
+        this.reduceWeakling(newPlayers);
+
         return newPlayers;
+    }
+
+    private reduceWeakling(players: InGamePlayer[]) {
+        for (const player of players) {
+            if (player.flaw == 'weakling') {
+                player.health = 2;
+            }
+        }
     }
 }
 
