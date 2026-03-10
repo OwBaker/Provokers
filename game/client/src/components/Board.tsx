@@ -119,7 +119,7 @@ export default function Board({ gameState, isMyTurn, onSelectTarget, myPlayer, s
         const radius = CELL_SIZE * 0.35;
         ctx.beginPath();
         ctx.arc(cx, cy, radius, 0, Math.PI * 2);
-        ctx.fillStyle = PLAYER_COLORS[i];
+        ctx.fillStyle = player.color;
         ctx.fill();
     });
 }

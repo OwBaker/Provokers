@@ -68,7 +68,7 @@ export default function Game() {
                     selectedAction={selectedAction}
                     onSelectedAction={onSelectedAction}
                 />
-            <PlayerInfo gameState={gameState}/>
+            <PlayerInfo myPlayer={getMyPlayer(gameState)!} gameState={gameState}/>
             </div></span>)
         }
     
@@ -85,7 +85,7 @@ export default function Game() {
                 moveTargetRef={localPosRef}
                 onSelectTarget={onSelectedTarget} />
                 <p className="my-2.5">You're dead...</p>
-            <PlayerInfo gameState={gameState}/>
+            <PlayerInfo myPlayer={getMyPlayer(gameState)!} gameState={gameState}/>
             </div></span>)
 }
 

@@ -8,6 +8,7 @@ import { ActionTarget, GameState, InGamePlayer, Player, PlayerId, Flaw, InitGame
 
 
 class GameManager {
+    private static playerColors = Array.of("red", "orange", "blue", "purple");
     private static flaws: Flaw[] = Array.of("farsighted", "bloodlust", "offensive-minded", "weakling");
     private static winCoords: Position[] = Array.of({x: 4, y: 5}, {x: 4, y:4}, {x: 5, y: 4}, {x: 5, y: 5})
 
@@ -455,12 +456,12 @@ class GameManager {
         let flaws: Flaw[] = GameManager.flaws.slice();
         let newPlayers: InGamePlayer[] = new Array<InGamePlayer>();
 
-        for (const player of players) {
+        players.forEach((player: Player, index: number) => {
             let rand = Math.floor(Math.random() * flaws.length);
             let flaw = flaws[rand];
-            newPlayers.push({ id: player.id, name: player.name, flaw: flaw, position: {x: 0, y: 0}, health: 3, actionPoints: 4, hasSubmitted: false, roundsOnWinSpace: 0});
+            newPlayers.push({ id: player.id, name: player.name, flaw: flaw, position: {x: 0, y: 0}, health: 3, actionPoints: 4, hasSubmitted: false, roundsOnWinSpace: 0, color: GameManager.playerColors[index]});
             flaws.splice(rand, 1);
-        }
+        })
 
         this.reduceWeakling(newPlayers);
 

@@ -16,6 +16,7 @@ export interface InGamePlayer {
     actionPoints: number;
     hasSubmitted: boolean;
     roundsOnWinSpace: number;
+    color: string;
 }
 
 export type Flaw = "farsighted" | "bloodlust" | "offensive-minded" | "weakling";

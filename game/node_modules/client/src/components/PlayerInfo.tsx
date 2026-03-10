@@ -1,10 +1,11 @@
 
-import type { GameState, InGamePlayer } from "../../../shared/types";
+import type { GameState, InGamePlayer, PlayerId } from "../../../shared/types";
 
 const PLAYER_COLORS = ["red", "orange", "blue", "purple"]
 
 type PlayerInfoProps = {
     gameState: GameState;
+    myPlayer: InGamePlayer
 }
 
 type playerProps = {
@@ -12,22 +13,53 @@ type playerProps = {
     health: number;
     ap: number;
     color: string;
+    me: boolean
 }
 
-export default function PlayerInfo({ gameState }: PlayerInfoProps) {
+export default function PlayerInfo({ gameState, myPlayer }: PlayerInfoProps) {
+
+    // may be slow to do this here, be weary
+    let playerData: InGamePlayer[] = new Array();
+    gameState.order.forEach((id: PlayerId) => {
+        for (const player of gameState.players) {
+            if (player.id == id) {
+                playerData.push(player);
+                break;
+            }
+        }
+    });
+
     
 
     return (<div>
         <ul>
-            {gameState.players.map((player: InGamePlayer, i: number) => {
-                return <Player key={player.id} name={player.name} health={player.health} ap={player.actionPoints} color={PLAYER_COLORS[i]}/>
+            {playerData.map((player: InGamePlayer, i: number) => {
+                let me;
+                if (player.id == myPlayer.id) {
+                    me = true;
+                } else {
+                    me = false;
+                }
+
+                return <Player me={me} key={player.id} name={player.name} health={player.health} ap={player.actionPoints} color={player.color}/>
             })}
         </ul>
     </div>)
 
 }
 
-function Player({ name, health, ap, color }: playerProps) {
+function Player({ name, health, ap, color, me }: playerProps) {
+
+    if (me) {
+        return (<div className="h-fit w-fit outline-4 outline-emerald-400">
+        <div style={{ backgroundColor: color }} className="w-4 h-4 rounded-full" />
+        <p>
+            {name} <br></br>
+            Health: {health} <br></br>
+            AP: {ap}
+        </p>
+    </div>)
+    }
 
     return (<div className="h-fit w-fit outline-1">
         <div style={{ backgroundColor: color }} className="w-4 h-4 rounded-full" />
