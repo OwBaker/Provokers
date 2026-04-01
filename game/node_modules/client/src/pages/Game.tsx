@@ -5,6 +5,7 @@ import type { Action, GameState, InGamePlayer, Position } from "../../../shared/
 import ActionPanel from "../components/ActionPanel";
 import { useRef, useState } from "react";
 import PlayerInfo from "../components/PlayerInfo";
+import FlawPanel from "../components/FlawPanel";
 
 export default function Game() {
     const { gameState } = useGameContext();
@@ -69,7 +70,11 @@ export default function Game() {
                     onSelectedAction={onSelectedAction}
                 />
             <PlayerInfo myPlayer={getMyPlayer(gameState)!} gameState={gameState}/>
-            </div></span>)
+            </div>
+            <div className="justify-center items-center flex my-2.5">
+                <FlawPanel myPlayer={getMyPlayer(gameState)}/>
+            </div>
+            </span>)
         }
     
     return (<span>
